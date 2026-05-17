@@ -2,9 +2,9 @@
 // 🔹 REPLACE THESE WITH YOUR ACTUAL EMAILJS CREDENTIALS 🔹
 // Get them from https://www.emailjs.com/ (free account)
 const EMAILJS_CONFIG = {
-  PUBLIC_KEY: "YOUR_EMAILJS_PUBLIC_KEY",   // e.g., "user_abc123"
-  SERVICE_ID: "YOUR_SERVICE_ID",           // e.g., "service_xyz"
-  TEMPLATE_ID: "YOUR_TEMPLATE_ID"          // e.g., "template_abc"
+  PUBLIC_KEY: "1IDMadPMkjBJFq70S",
+  SERVICE_ID: "service_5udght7",
+  TEMPLATE_ID: "template_7gebh6w"
 };
 
 // Initialize EmailJS if keys are provided
