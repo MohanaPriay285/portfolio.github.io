@@ -424,7 +424,7 @@ h2:hover:after {
 .dark-form input, .dark-form select, .dark-form textarea {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.2);
-  color: white;
+  color: black;
   border-radius: 60px;
   padding: 12px 20px;
   width: 100%;
