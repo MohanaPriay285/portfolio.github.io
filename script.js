@@ -6,7 +6,7 @@ const EMAILJS_CONFIG = {
   TEMPLATE_ID: "template_7gebh6w"
 };
 
-// Wait for EmailJS SDK to be loaded before initialising
+// Initialize EmailJS (safe check)
 function initEmailJS() {
   if (typeof emailjs === 'undefined') {
     console.error('EmailJS SDK not loaded – add script: https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js');
@@ -28,14 +28,7 @@ function setTheme(themeName) {
 
 function loadTheme() {
   const saved = localStorage.getItem('premium-theme');
-  const validThemes = [
-    'original',
-    'lavender',
-    'mauve',
-    'powder',
-    'sage',
-    'peach'
-  ];
+  const validThemes = ['original', 'lavender', 'mauve', 'powder', 'sage', 'peach'];
   if (saved && validThemes.includes(saved)) {
     setTheme(saved);
   } else {
@@ -128,30 +121,10 @@ function showToast(message, isError = false) {
 
 // ================= CONTACT FORM =================
 
-/**
- * REQUIRED FORM FIELD NAMES (must match EmailJS template variables):
- * - name="from_name"   (sender's name)
- * - name="reply_to"    (sender's email)
- * - name="message"     (message content)
- *
- * Example HTML:
- * <input type="text" name="from_name" required>
- * <input type="email" name="reply_to" required>
- * <textarea name="message" required></textarea>
- */
 function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) {
-    console.warn('Contact form not found – skipping init');
-    return;
-  }
-
-  // Validate required field names before attaching event
-  const requiredFields = ['from_name', 'reply_to', 'message'];
-  const missingFields = requiredFields.filter(field => !form.querySelector(`[name="${field}"]`));
-  if (missingFields.length) {
-    console.error(`Contact form missing required name attributes: ${missingFields.join(', ')}`);
-    showToast(`⚠️ Form error: missing ${missingFields.join(', ')} fields`, true);
+    console.warn('Contact form not found');
     return;
   }
 
@@ -166,15 +139,38 @@ function initContactForm() {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending...';
 
     try {
-      // Ensure EmailJS is ready
       if (typeof emailjs === 'undefined') {
         throw new Error('EmailJS library not loaded. Please include the EmailJS script.');
       }
 
-      const result = await emailjs.sendForm(
+      // Get form data
+      const formData = new FormData(form);
+      const from_name = formData.get('from_name');
+      const from_email = formData.get('from_email');
+      const company = formData.get('company') || '';
+      const project_type = formData.get('project_type') || '';
+      const message = formData.get('message');
+
+      // Validate required fields
+      if (!from_name || !from_email || !message) {
+        throw new Error('Please fill in name, email, and message.');
+      }
+
+      // Prepare parameters for EmailJS template
+      // Map your form fields to what the template expects.
+      // Edit this object if your template uses different variable names.
+      const templateParams = {
+        from_name: from_name,
+        reply_to: from_email,      // EmailJS standard field for reply-to
+        message: message,
+        company: company,
+        project_type: project_type
+      };
+
+      const result = await emailjs.send(
         EMAILJS_CONFIG.SERVICE_ID,
         EMAILJS_CONFIG.TEMPLATE_ID,
-        form,
+        templateParams,
         EMAILJS_CONFIG.PUBLIC_KEY
       );
 
@@ -184,12 +180,9 @@ function initContactForm() {
 
     } catch (error) {
       console.error('EmailJS error:', error);
-
-      // Extract meaningful error message
       let errorMsg = '❌ Failed to send message.';
       if (error.text) errorMsg += ` ${error.text}`;
       else if (error.message) errorMsg += ` ${error.message}`;
-
       showToast(errorMsg, true);
     } finally {
       submitBtn.disabled = false;
@@ -260,24 +253,18 @@ function initSmoothScroll() {
 // ================= INITIALIZE EVERYTHING =================
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Theme
   loadTheme();
   initThemeSwitcher();
-
-  // 2. UI components
   initMobileMenu();
   initHireModal();
   initGitHubButtons();
   initScrollReveal();
   initSmoothScroll();
 
-  // 3. EmailJS – must be initialised before form handler
   const emailJsReady = initEmailJS();
   if (!emailJsReady) {
     showToast('⚠️ Email service not available – check console', true);
   }
-
-  // 4. Contact form (depends on EmailJS)
   initContactForm();
 });
 
